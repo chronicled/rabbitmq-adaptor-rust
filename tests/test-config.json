@@ -1,0 +1,16 @@
+{
+  "test-valid-detailed": {
+    "username": "guest",
+    "password": "pwd",
+    "host": "localhost",
+    "port": 5672,
+    "vhost": "/develop",
+    "frame_max": 65535
+  },
+  "test-detailed-default": {
+    "host": "localhost",
+    "port": 5672
+  },
+  "test-valid-uri": "amqp://user:pwd@rmq-server:4321/%2f?frame_max=65535",
+  "test-not-valid": "foo:1234"
+}

@@ -1,0 +1,95 @@
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.2.4
+jobs:
+  test:
+    environment:
+      RUST_LOG: debug,lapin=info
+    docker:
+      - image: cimg/rust:1.68
+      - image: rabbitmq
+    steps:
+      - checkout
+      - run:
+          name: Version information
+          command: rustc --version; cargo --version; rustup --version
+      - run:
+          name: Calculate dependencies
+          command: cargo generate-lockfile
+      - run:
+          name: 'Install llvm-tools-preview'
+          command: rustup component add llvm-tools-preview
+      - run:
+          name: Install cargo llvm-cov
+          command: cargo install cargo-quickinstall && cargo quickinstall cargo-llvm-cov
+      - restore_cache:
+          keys:
+            - v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Build all targets
+          command: cargo build --all --all-targets
+      - save_cache:
+          paths:
+            - /usr/local/cargo/registry
+            - target/debug/.fingerprint
+            - target/debug/build
+            - target/debug/deps
+          key: v4-cargo-cache-{{ arch }}-{{ checksum "Cargo.lock" }}
+      - run:
+          name: Cargo clippy
+          command: cargo clippy --all-targets --all-features -- -D warnings
+      - run:
+          name: Run all tests
+          command: cargo llvm-cov --all --lcov --output-path lcov.info -- --nocapture
+      - codecov/upload:
+          file: lcov.info
+  deploy:
+    docker:
+      - image: cimg/rust:1.68
+    steps:
+      - checkout
+      - run:
+          name: Install cloudsmith CLI
+          command: sudo apt update && sudo apt install python3 python3-pip && pip3 install cloudsmith-cli
+      - run:
+          name: Generate package file
+          command: cargo package
+      - run:
+          name: Push to Cloudsmith
+          command: ~/.local/bin/cloudsmith push cargo chronicled/platform-v2-public target/package/rabbitmq_adaptor-*.crate
+
+  fossa-attribution:
+    docker:
+      - image: cimg/rust:1.65
+    resource_class: medium
+    environment:
+      BUILD_DUMMY_WASM_BINARY: 1
+      NO_COLOR: 1
+    steps:
+      - checkout
+      - run:
+          name: 'fossa-cli install'
+          command: |
+            curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install-latest.sh | bash
+      - run:
+          name: 'FOSSA analyze'
+          command: |
+            fossa analyze
+
+workflows:
+  rabbitmq-adaptor-rs-workflow:
+    jobs:
+      - fossa-attribution:
+          filters:
+            branches:
+              only:
+                - /release-.*/
+                - develop
+          context: org-global
+      - test
+      - deploy:
+          filters:
+            branches:
+              only:
+                - develop
+                - /epic.*/

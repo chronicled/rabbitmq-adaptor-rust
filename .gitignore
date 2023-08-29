@@ -1,0 +1,15 @@
+/target
+**/*.rs.bk
+
+#Added by cargo
+#
+#already existing elements are commented out
+
+#/target
+#**/*.rs.bk
+/.idea
+.DS_Store
+.project
+.clj-kondo
+.metals
+.vscode
