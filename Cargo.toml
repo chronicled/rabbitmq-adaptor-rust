@@ -1,6 +1,6 @@
 [package]
 name = "rabbitmq_adaptor"
-version = "0.20.1"
+version = "0.20.2"
 edition = "2021"
 publish = ["chronicled-platform-v2-public"]
 
