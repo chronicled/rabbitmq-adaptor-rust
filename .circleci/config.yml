@@ -1,12 +1,12 @@
 version: 2.1
 orbs:
-  codecov: codecov/codecov@3.2.4
+  codecov: codecov/codecov@3.2.5
 jobs:
   test:
     environment:
       RUST_LOG: debug,lapin=info
     docker:
-      - image: cimg/rust:1.68
+      - image: cimg/rust:1.72
       - image: rabbitmq
     steps:
       - checkout
@@ -45,7 +45,7 @@ jobs:
           file: lcov.info
   deploy:
     docker:
-      - image: cimg/rust:1.68
+      - image: cimg/rust:1.72
     steps:
       - checkout
       - run:
@@ -60,7 +60,7 @@ jobs:
 
   fossa-attribution:
     docker:
-      - image: cimg/rust:1.65
+      - image: cimg/rust:1.72
     resource_class: medium
     environment:
       BUILD_DUMMY_WASM_BINARY: 1
@@ -75,7 +75,6 @@ jobs:
           name: 'FOSSA analyze'
           command: |
             fossa analyze
-
 workflows:
   rabbitmq-adaptor-rs-workflow:
     jobs:
