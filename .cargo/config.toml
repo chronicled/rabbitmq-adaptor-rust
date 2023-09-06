@@ -1,4 +1,8 @@
-[registries]
+[registry]
 default = "crates-io"
-chronicled-platform-v2-public = { index = "https://dl.cloudsmith.io/public/chronicled/platform-v2-public/cargo/index.git" }
-crates-io = { index = "https://github.com/rust-lang/crates.io-index" }
+
+[registries.chronicled-platform-v2-public]
+index = "https://dl.cloudsmith.io/public/chronicled/platform-v2-public/cargo/index.git"
+
+[registries.crates-io]
+index = "https://github.com/rust-lang/crates.io-index"
